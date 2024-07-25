@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+    laravelapp:
+        container_name: laravelapp
+        image: francescoxx/laravelapp:1.0.0
+        build: .
+        ports:
+            - "8000:8000"
+        env_file:
+            - .env
+        volumes:
+            - /c/laragon/www/kp-documents-generator:/var/www/html
+        depends_on:
+            - db
+
+    db:
+        container_name: db
+        image: postgres:12
+        ports:
+            - "5432:5432"
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_DB=itr
+        volumes:
+            - db-data:/var/lib/postgresql/data
+
+    webserver:
+        image: nginx:alpine
+        container_name: webserver
+        restart: unless-stopped
+        ports:
+        - "80:80"
+        volumes:
+        - .:/var/www
+        - ./nginx.conf:/etc/nginx/nginx.conf
+        depends_on:
+        - laravelapp
+
+volumes:
+    db-data: {}
